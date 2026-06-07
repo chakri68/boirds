@@ -5,51 +5,164 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Boids — Flocking Simulation</title>
+    <script>
+      (function () {
+        // Only accept theming from your ROM Shelf origin(s). Add localhost for dev.
+        var ALLOWED = ["chakri.me", "localhost:"];
+
+        function applySkin(s) {
+          if (!s) return;
+
+          if (s.fontHref && !document.getElementById("gb-skin-font")) {
+            const link = document.createElement("link");
+            link.id = "gb-skin-font";
+            link.rel = "stylesheet";
+            link.href = s.fontHref;
+            document.head.appendChild(link);
+          }
+
+          const css = `
+    html, body {
+      ${s.bg ? `background-color: ${s.bg} !important;` : ""}
+      ${s.fg ? `color: ${s.fg} !important;` : ""}
+      ${s.fontFamily ? `font-family: ${s.fontFamily} !important;` : ""}
+    }
+
+    body * {
+    ${s.bg ? `background-color: ${s.bg} !important;` : ""}
+      ${s.fg ? `color: ${s.fg};` : ""}
+      ${s.fontFamily ? `font-family: ${s.fontFamily};` : ""}
+    }
+  `;
+
+          const style =
+            document.getElementById("gb-skin-style") ||
+            document.createElement("style");
+
+          style.id = "gb-skin-style";
+          style.textContent = css;
+          document.head.appendChild(style);
+        }
+
+        window.addEventListener("message", function (e) {
+          console.log("Hello");
+          console.log({ or: e.origin });
+          if (ALLOWED.filter((a) => e.origin.includes(a)).length == 0) return;
+          var d = e.data;
+          if (d && d.type === "gb-screen-skin") applySkin(d);
+        });
+
+        // Tell the parent we're ready, in case it posted before this listener existed.
+        try {
+          parent.postMessage({ type: "gb-screen-ready" }, "*");
+        } catch (_) {}
+      })();
+    </script>
   </head>
   <body>
     <canvas id="scene"></canvas>
     <aside id="panel">
       <h1>Boids</h1>
-      <p class="hint">Craig Reynolds' flocking rules: separation, alignment, cohesion.</p>
+      <p class="hint">
+        Craig Reynolds' flocking rules: separation, alignment, cohesion.
+      </p>
 
       <label>
         <span>Boids <output data-for="count">300</output></span>
-        <input type="range" id="count" min="10" max="1500" step="10" value="300" />
+        <input
+          type="range"
+          id="count"
+          min="10"
+          max="1500"
+          step="10"
+          value="300"
+        />
       </label>
 
       <label>
         <span>Visual range <output data-for="visualRange">60</output></span>
-        <input type="range" id="visualRange" min="10" max="200" step="1" value="60" />
+        <input
+          type="range"
+          id="visualRange"
+          min="10"
+          max="200"
+          step="1"
+          value="60"
+        />
       </label>
 
       <label>
-        <span>Protected range <output data-for="protectedRange">12</output></span>
-        <input type="range" id="protectedRange" min="2" max="60" step="1" value="12" />
+        <span
+          >Protected range <output data-for="protectedRange">12</output></span
+        >
+        <input
+          type="range"
+          id="protectedRange"
+          min="2"
+          max="60"
+          step="1"
+          value="12"
+        />
       </label>
 
       <label>
         <span>Separation <output data-for="separation">0.06</output></span>
-        <input type="range" id="separation" min="0" max="0.3" step="0.005" value="0.06" />
+        <input
+          type="range"
+          id="separation"
+          min="0"
+          max="0.3"
+          step="0.005"
+          value="0.06"
+        />
       </label>
 
       <label>
         <span>Alignment <output data-for="alignment">0.05</output></span>
-        <input type="range" id="alignment" min="0" max="0.3" step="0.005" value="0.05" />
+        <input
+          type="range"
+          id="alignment"
+          min="0"
+          max="0.3"
+          step="0.005"
+          value="0.05"
+        />
       </label>
 
       <label>
         <span>Cohesion <output data-for="cohesion">0.0008</output></span>
-        <input type="range" id="cohesion" min="0" max="0.005" step="0.0001" value="0.0008" />
+        <input
+          type="range"
+          id="cohesion"
+          min="0"
+          max="0.005"
+          step="0.0001"
+          value="0.0008"
+        />
       </label>
 
       <label>
         <span>Max speed <output data-for="maxSpeed">4</output></span>
-        <input type="range" id="maxSpeed" min="1" max="10" step="0.1" value="4" />
+        <input
+          type="range"
+          id="maxSpeed"
+          min="1"
+          max="10"
+          step="0.1"
+          value="4"
+        />
       </label>
 
       <label>
         <span>Min speed <output data-for="minSpeed">2</output></span>
-        <input type="range" id="minSpeed" min="0" max="6" step="0.1" value="2" />
+        <input
+          type="range"
+          id="minSpeed"
+          min="0"
+          max="6"
+          step="0.1"
+          value="2"
+        />
       </label>
 
       <div class="row">
